@@ -6,6 +6,23 @@
   <link rel="stylesheet" href="styles/main.css">
   <link href="http://fonts.googleapis.com/css?family=Roboto:400,300,500,700" rel="stylesheet" type="text/css">
   <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+
+<!--   <script type="text/template" id="gameInfo">
+  <h1 class="chosen-name">Who is<span class='chosen-name'><%= chosen %></span>?</h1>
+  <h2 class="score"><%= score %></h2>
+  <h3 class="rounds"><%= rounds %></h3>
+  <span class="button-container">
+    <button class="reset-button">Reset</button>
+    <button class="hint-button">Hint?</button>
+  </span>
+</script> -->
+
+  <script type="text/template" id="namePic">
+      <img src="<%= url %>">
+      <span class="person-info">
+        <h3 class="person-info-title" data-name="<%= name %>"><%= name %></h3>
+      </span>
+  </script>
 </head>
 <body>
 

@@ -2,7 +2,7 @@
   'use strict';
 
   //
-  // App Model
+  // Person Model
   //
   var Person = Backbone.Model.extend({
     defaults: {
@@ -23,30 +23,31 @@
 
     parse: function(response) {
       return _.sample(((_.shuffle(response))), 5);
-     }
+    },
   });
 
   //
-  //Index Page View
+  // Person View
   //
-  var IndexPageView = Backbone.View.extend({
-    className: '.game-container',
+  var PersonView = Backbone.View.extend({
+    className: 'person-container',
+    template: _.template($('#namePic').html()),
     events: {
-      "click div": "selectImage",
-      "click .reset-button": "reset",
-      "click .hint-button": "hint"
+      "click": "selectImage"
     },
-
     selectImage: function(e) {
-        if ($(e.currentTarget).text() == this.chosen && this.attempts === 0){
+      var chosenObj = localStorage.getItem('chosen');
+      this.chosen = JSON.parse(chosenObj);
+        if (this.$el.find('h3').data('name') == this.chosen.name && +localStorage.attempts === 0){
           $(e.currentTarget.children[1]).addClass("correct");
           this.scoreCount = +localStorage.score + 1;
           localStorage.setItem("score", +this.scoreCount);
-        } else if ($(e.currentTarget).text() == this.chosen && this.attempts > 0) {
+        } else if (this.$el.find('h3').data('name') == this.chosen.name && +localStorage.attempts > 0) {
           $(e.currentTarget.children[1]).addClass("correct");
         } else {
           $(e.currentTarget.children[1]).addClass("incorrect");
-          this.attempts = this.attempts + 1;
+          this.attempts = +localStorage.attempts + 1;
+          localStorage.setItem('attempts', this.attempts);
         }
         if ($(e.currentTarget.children[1]).hasClass("correct")){
           setTimeout(function(){
@@ -56,6 +57,23 @@
           }, 1000);
         }
       },
+
+    render: function () {
+      localStorage.setItem('attempts', 0);
+      this.$el.html(this.template(this.model.toJSON()));
+      return this;
+    }
+  });
+
+  //
+  // Index Page View
+  //
+  var IndexPageView = Backbone.View.extend({
+    className: 'game-container',
+    events: {
+      "click .reset-button": "reset",
+      "click .hint-button": "hint"
+    },
 
     renderChosenAndScore: function() {
       var person = this.collection.first(5);
@@ -73,25 +91,28 @@
         rounds = 'Rounds ' + (+localStorage.rounds);
       }
       person = _.shuffle(person);
+      localStorage.setItem("chosen", JSON.stringify(person[0]));
       this.chosen = person[0].get('name');
-      this.$el.html('<h1 class="chosen-name">' + "Who is " + this.chosen + "?" + '</h1>' + '<h2 class="score">' +
+      this.$el.html('<h1 class="chosen-name">' + "Who is <span class='chosen-name'>" + this.chosen + "</span>?" + '</h1>' + '<h2 class="score">' +
       scorePercent + '</h2>' + '<h3 class="rounds">' + rounds + '</h3>' + '<span class="button-container">' +
       '<button class="reset-button">' + 'Reset' + '</button>'+ '<button class="hint-button">' + 'Hint?' + '</button>' + '</span>');
 
     },
 
     render: function() {
-      this.attempts = 0;
+      this.addAllPeople();
       if (localStorage.score === undefined) {
         localStorage.setItem("score", 0);
       }
-      var self = this;
-      this.collection.each(function(person){
-        var name = person.get('name');
-        var url = person.get('url');
-        self.$el.append('<div class="person-container">' + '<img src="' + url + '"/>' + '<span class="person-info">' +
-        '<h3 class="person-info-title">' + name + '</h3>' + '</span>' + '</div>');
-      });
+    },
+
+    addOnePerson: function (person) {
+      var personView = new PersonView({model: person});
+      this.$el.append(personView.render().el);
+    },
+
+    addAllPeople: function () {
+      _.each(this.collection.models, this.addOnePerson, this);
     },
 
     hint: function(){
@@ -146,7 +167,7 @@
     },
 
     initialize: function() {
-      this.willowTree = new People([{model: this.Person}]);
+      this.willowTree = new People();
       this.indexPage = new IndexPageView({collection: this.willowTree});
     },
 
