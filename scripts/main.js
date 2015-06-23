@@ -36,20 +36,21 @@
       "click": "selectImage"
     },
     selectImage: function(e) {
+      var target = $(e.currentTarget);
       var chosenObj = localStorage.getItem('chosen');
       this.chosen = JSON.parse(chosenObj);
         if (this.$el.find('h3').data('name') == this.chosen.name && +localStorage.attempts === 0){
-          $(e.currentTarget.children[1]).addClass("correct");
+          $(target.children().get(1)).addClass("correct");
           this.scoreCount = +localStorage.score + 1;
           localStorage.setItem("score", +this.scoreCount);
         } else if (this.$el.find('h3').data('name') == this.chosen.name && +localStorage.attempts > 0) {
-          $(e.currentTarget.children[1]).addClass("correct");
+          $(target.children().get(1)).addClass("correct");
         } else {
-          $(e.currentTarget.children[1]).addClass("incorrect");
+          $(target.children().get(1)).addClass("incorrect");
           this.attempts = +localStorage.attempts + 1;
           localStorage.setItem('attempts', this.attempts);
         }
-        if ($(e.currentTarget.children[1]).hasClass("correct")){
+        if ($(target.children().get(1)).hasClass("correct")){
           setTimeout(function(){
             this.roundCount = +localStorage.rounds + 1;
             localStorage.setItem("rounds", this.roundCount);
